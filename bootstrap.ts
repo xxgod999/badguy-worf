@@ -8,6 +8,8 @@ const IManager = new MainManager(IMenu)
 
 EventsSDK.on("Tick", dt => IManager.OnTick(dt))
 
+EventsSDK.on("PreDraw", () => IManager.OnDraw())
+
 EventsSDK.on("GameEnded", () => IManager.OnGameEnded())
 
 EventsSDK.on("GameStarted", () => IManager.OnGameStarted())

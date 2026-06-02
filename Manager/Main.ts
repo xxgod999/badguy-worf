@@ -32,8 +32,21 @@ export class MainManager {
 		}
 
 		this.MyHero = hero
-		this.LockCamera(hero)
 		this.ProcessAutoPush(hero)
+	}
+
+	public OnDraw(): void {
+		if (!this.menu.State) {
+			return
+		}
+
+		const hero = this.MyHero ?? LocalPlayer?.Hero
+		if (hero === undefined || !hero.IsAlive || !hero.IsSpawned) {
+			return
+		}
+
+		this.MyHero = hero
+		this.LockCamera(hero)
 	}
 
 	public OnGameEnded(): void {
@@ -57,7 +70,8 @@ export class MainManager {
 	}
 
 	protected LockCamera(hero: Hero): void {
-		CameraSDK.Position = hero.Position.Clone()
+		hero.Position.toIOBuffer()
+		Camera.Position = true
 		CameraSDK.Angles = this.CameraAngle
 		CameraSDK.Distance = this.CameraDistance
 	}
