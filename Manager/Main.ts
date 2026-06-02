@@ -32,7 +32,7 @@ export class MainManager {
 		}
 
 		this.MyHero = hero
-		this.LockCamera()
+		this.LockCamera(hero)
 		this.ProcessAutoPush(hero)
 	}
 
@@ -56,7 +56,8 @@ export class MainManager {
 		}
 	}
 
-	protected LockCamera(): void {
+	protected LockCamera(hero: Hero): void {
+		CameraSDK.Position = hero.Position.Clone()
 		CameraSDK.Angles = this.CameraAngle
 		CameraSDK.Distance = this.CameraDistance
 	}
