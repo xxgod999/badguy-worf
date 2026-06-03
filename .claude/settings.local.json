@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "x64dbg",
+    "ida-pro-mcp"
+  ]
+}

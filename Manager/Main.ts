@@ -1,5 +1,5 @@
 import {
-	CameraSDK,
+	ConVarsSDK,
 	Creep,
 	CreepPathCorner,
 	DotaMap,
@@ -7,7 +7,6 @@ import {
 	EntityManager,
 	Hero,
 	LocalPlayer,
-	QAngle,
 	Tower,
 	Vector3
 } from "github.com/octarine-public/wrapper/index"
@@ -16,8 +15,6 @@ import { MenuManager } from "./Menu"
 
 export class MainManager {
 	protected MyHero: Nullable<Hero>
-	protected readonly CameraAngle = new QAngle(60, 90, 0)
-	protected readonly CameraDistance = 1200
 
 	constructor(protected readonly menu: MenuManager) {}
 
@@ -69,11 +66,8 @@ export class MainManager {
 		}
 	}
 
-	protected LockCamera(hero: Hero): void {
-		hero.Position.toIOBuffer()
-		Camera.Position = true
-		CameraSDK.Angles = this.CameraAngle
-		CameraSDK.Distance = this.CameraDistance
+	protected LockCamera(_hero: Hero): void {
+		ConVarsSDK.Set("dota_camera_lock", 1)
 	}
 
 	protected ProcessAutoPush(hero: Hero): void {
