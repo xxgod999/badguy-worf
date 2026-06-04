@@ -95,6 +95,9 @@ export class MainManager {
 		if (this.MyHero === entity) {
 			this.MyHero = undefined
 		}
+		if (this.LastHitCommitTarget === entity) {
+			this.LastHitCommitTarget = undefined
+		}
 	}
 
 	protected LockCamera(_hero: Hero): void {
