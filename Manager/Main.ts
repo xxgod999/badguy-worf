@@ -26,6 +26,7 @@ const LANE_CREEP_DAMAGE_PER_SECOND = 45
 
 export class MainManager {
 	protected MyHero: Nullable<Hero>
+	protected LastHitCommitTarget: Nullable<Creep>
 	protected LastX = 0
 	protected LastY = 0
 	protected StuckTime = 0
@@ -126,6 +127,10 @@ export class MainManager {
 				DotaMap.GetCreepCurrentTarget(hero.Position, hero.Team, lane),
 				towers
 			)
+			return
+		}
+
+		if (this.HandleCommittedLastHit(hero)) {
 			return
 		}
 
@@ -256,17 +261,41 @@ export class MainManager {
 		const distance = hero.Distance2D(target)
 
 		if (decision.shouldAttack && distance <= attackRange && hero.CanAttack(target)) {
+			this.LastHitCommitTarget = target
 			hero.AttackTarget(target)
 			return true
 		}
 
 		const desiredRange = Math.max(attackRange - LAST_HIT_ATTACK_RANGE_BUFFER, 80)
 		if (distance > desiredRange) {
+			this.LastHitCommitTarget = target
 			hero.MoveTo(this.GetPointAtDistanceFromTarget(hero, target, desiredRange))
 			return true
 		}
 
 		return false
+	}
+
+	protected HandleCommittedLastHit(hero: Hero): boolean {
+		const target = this.LastHitCommitTarget
+		if (target === undefined) {
+			return false
+		}
+		if (!this.IsValidLastHitTarget(hero, target)) {
+			this.LastHitCommitTarget = undefined
+			return false
+		}
+
+		const attackRange = hero.GetAttackRange(target)
+		const distance = hero.Distance2D(target)
+		const desiredRange = Math.max(attackRange - LAST_HIT_ATTACK_RANGE_BUFFER, 80)
+		if (distance > desiredRange) {
+			hero.MoveTo(this.GetPointAtDistanceFromTarget(hero, target, desiredRange))
+			return true
+		}
+
+		hero.AttackTarget(target)
+		return true
 	}
 
 	protected GetNearestEnemyHero(hero: Hero, heroes: Hero[]): Nullable<Hero> {
