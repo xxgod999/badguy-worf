@@ -21,7 +21,7 @@ interface LastHitDecision {
 const CREEP_DISTANCE_TOLERANCE = 80
 const HOLD_POSITION_DISTANCE = 90
 const LAST_HIT_ATTACK_RANGE_BUFFER = 50
-const LAST_HIT_PREPARE_TIME = 1.25
+const LAST_HIT_PREPARE_TIME = 0.85
 const LAST_HIT_SEARCH_RANGE = 1600
 const LANE_CREEP_DAMAGE_PER_SECOND = 45
 
@@ -131,8 +131,7 @@ export class MainManager {
 		}
 
 		const lastHit = this.FindLastHitTarget(hero, laneCreeps)
-		if (lastHit !== undefined) {
-			this.HandleLastHit(hero, lastHit)
+		if (lastHit !== undefined && this.HandleLastHit(hero, lastHit)) {
 			return
 		}
 
@@ -191,7 +190,12 @@ export class MainManager {
 				creep,
 				timeToImpact + LAST_HIT_PREPARE_TIME
 			)
-			const shouldPrepare = damage >= prepareHP
+			const desiredRange = Math.max(
+				attackRange - LAST_HIT_ATTACK_RANGE_BUFFER,
+				80
+			)
+			const shouldPrepare =
+				damage >= prepareHP && distance > desiredRange + HOLD_POSITION_DISTANCE
 			if (!shouldAttack && !shouldPrepare) {
 				continue
 			}
@@ -247,23 +251,23 @@ export class MainManager {
 		return creep.HP - LANE_CREEP_DAMAGE_PER_SECOND * Math.max(delay, 0)
 	}
 
-	protected HandleLastHit(hero: Hero, decision: LastHitDecision): void {
+	protected HandleLastHit(hero: Hero, decision: LastHitDecision): boolean {
 		const target = decision.target
 		const attackRange = hero.GetAttackRange(target)
 		const distance = hero.Distance2D(target)
 
 		if (decision.shouldAttack && distance <= attackRange && hero.CanAttack(target)) {
 			hero.AttackTarget(target)
-			return
+			return true
 		}
 
 		const desiredRange = Math.max(attackRange - LAST_HIT_ATTACK_RANGE_BUFFER, 80)
 		if (distance > desiredRange) {
 			hero.MoveTo(this.GetPointAtDistanceFromTarget(hero, target, desiredRange))
-			return
+			return true
 		}
 
-		hero.HoldPosition(hero.Position)
+		return false
 	}
 
 	protected GetNearestEnemyHero(hero: Hero, heroes: Hero[]): Nullable<Hero> {
