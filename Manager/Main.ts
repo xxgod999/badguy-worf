@@ -18,7 +18,6 @@ interface LastHitDecision {
 	readonly shouldAttack: boolean
 }
 
-const CREEP_DISTANCE_TOLERANCE = 80
 const HOLD_POSITION_DISTANCE = 90
 const LAST_HIT_ATTACK_RANGE_BUFFER = 50
 const LAST_HIT_PREPARE_TIME = 0.85
@@ -140,7 +139,7 @@ export class MainManager {
 			return
 		}
 
-		this.PositionNearCreeps(hero, laneCreeps, lane)
+		this.PositionNearCreeps(hero, laneCreeps, lane, towers)
 	}
 
 	protected GetLaneCreeps(creeps: Creep[], lane: number): Creep[] {
@@ -375,7 +374,8 @@ export class MainManager {
 	protected PositionNearCreeps(
 		hero: Hero,
 		laneCreeps: Creep[],
-		lane: number
+		lane: number,
+		towers: Tower[]
 	): void {
 		const targetDist = this.menu.CreepDistance
 		let nearestFriendly: Nullable<Creep>
@@ -395,6 +395,11 @@ export class MainManager {
 		}
 
 		if (nearestFriendly === undefined) {
+			this.MoveToSafePosition(
+				hero,
+				DotaMap.GetCreepCurrentTarget(hero.Position, hero.Team, lane),
+				towers
+			)
 			return
 		}
 
@@ -406,10 +411,7 @@ export class MainManager {
 		)
 		const holdDistance = hero.Distance2D(holdPosition)
 
-		if (
-			Math.abs(minDist - targetDist) <= CREEP_DISTANCE_TOLERANCE ||
-			holdDistance <= HOLD_POSITION_DISTANCE
-		) {
+		if (holdDistance <= HOLD_POSITION_DISTANCE) {
 			hero.HoldPosition(hero.Position)
 			return
 		}
